@@ -3,13 +3,17 @@
 <script src="jquery-2.0.3.min.js"></script>
 <script src="moment.min.2_7_0.js"></script>
 <script type="text/javascript">
-google.setOnLoadCallback(drawChart);
+google.setOnLoadCallback(grabDataAndDrawChart);
 
-function drawChart() {
+function grabDataAndDrawChart() {
+  var url = "http://graphite.px.gid.gap.com/render?from=-2hours&until=now&width=400&height=250&target=rrd-longterm.pxlicapp101.gid-icmTcSrv-TimerMonitor_*.counter-TotalDuration.value&_uniq=0.6581096386090421&title=rrd-longterm.pxlicapp101.gid-icmTcSrv-TimerMonitor_AdjustInventoryTimer.counter-TotalDuration.value&format=json&jsonp=?";
+  $.getJSON(url, function(data) {
+      return drawChart(convert(data));
+  });
+}
+
+function drawChart(chartData) {
   var container = document.getElementById('container');
-
-  //grabData();
-  var chartData = convert(mockData());
   var chart = new google.visualization.Timeline(container);
   var dataTable = new google.visualization.DataTable();
 
@@ -17,28 +21,15 @@ function drawChart() {
   dataTable.addColumn({ type: 'date', id: 'Start' });
   dataTable.addColumn({ type: 'date', id: 'End' });
 
-  // fetch execution data from graphite
-
   dataTable.addRows(chartData);
-  //dataTable.addRows([
-   // [ 'Washington', new Date(1789, 3, 29), new Date(1797, 2, 3) ],
-   // [ 'Adams',      new Date(1797, 2, 3),  new Date(1801, 2, 3) ],
-   // [ 'Jefferson',  new Date(1801, 2, 3),  new Date(1809, 2, 3) ]]);
 
   chart.draw(dataTable);
-}
-
-function grabData() {
-  var url = "http://graphite.sf.gid.gap.com/render/?&width=1024&height=768&bgcolor=white&fgcolor=black&majorGridLineColor=black&minorGridLineColor=grey&title=Transactions%20per%20second&vtitle=Transactions&target=alias%28sum%28rrd-longterm.cllwmapc003.gid-nwmsAgentOutboundPickingSrv-TimerMonitor_WMSCreateWaveAgentExecuteJobTimer.counter-TotalHits.value%29,%27WMSCreate_tps%27%29&target=alias%28sum%28rrd-longterm.cllwmapc003.gid-nwmsAgentOutboundPickingSrv-TimerMonitor_WMSReleaseWaveAgentExecuteJobTimer.counter-TotalHits.value%29,%27WMSRelease_tps%27%29&target=alias%28sum%28rrd-longterm.cllwmapc003.gid-nwmsAgentOutboundPickingSrv-TimerMonitor_WMSContainerizeWaveAgentExecuteTaskTimer.counter-TotalHits.value%29,%27WMSContainerize_tps%27%29&from=16:00_20140519&until=16:30_20140519&format=json";
-  $.getJSON(url, function(data) {
-      convert(mockData());
-  });
 }
 
 function mockData() {
   return [
     {"target": "CartonCleanupFilterAPITimer.counter-TotalDuration.value",
-        "datapoints": [[3*60*60*1000, 1403160060]]},
+        "datapoints": [[3*60*60*1000, 1403160060], [2.7*60*60*1000, 1403119302]]},
      {"target":
          "TimerMonitor_GIDPrintSVCShipmentsInvokeTimer.counter-TotalDuration.value",
          "datapoints": [[4.5*60*60*1000, 1403160060]]},
@@ -50,19 +41,18 @@ function mockData() {
 }
 
 function convert(data) {
-  console.log(data);
   var chartData = [];
   jQuery.each(data, function(index, metric) {
     var metric_name = metric.target;
-    console.log(metric_name);
     var datapoints = metric.datapoints;
     $.each(datapoints, function(index, element){
-      console.log(element[0] + " " + element[1]);
-      var m = moment.unix(element[1]);
-      var end_time = m.clone();
       var execution_time = element[0];
-      var start_time = m.subtract('ms', execution_time);
-      chartData.push([metric_name, start_time.toDate(), end_time.toDate()]);
+      if(execution_time != null && execution_time > 0) {
+        var m = moment.unix(element[1]);
+        var end_time = m.clone();
+        var start_time = m.subtract('ms', execution_time);
+        chartData.push([metric_name, start_time.toDate(), end_time.toDate()]);
+      }
     });
 
   });

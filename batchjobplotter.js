@@ -1,8 +1,3 @@
-<script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
-       'version':'1','packages':['timeline']}]}"></script>
-<script src="jquery-2.0.3.min.js"></script>
-<script src="moment.min.2_7_0.js"></script>
-<script type="text/javascript">
 google.setOnLoadCallback(grabDataAndDrawChart);
 
 function grabDataAndDrawChart() {
@@ -58,5 +53,3 @@ function convert(data) {
   });
   return chartData;
 }
-</script>
-<div id="container" style="width: 100%; height: 100%;"></div>

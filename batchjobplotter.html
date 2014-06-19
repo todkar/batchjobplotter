@@ -19,7 +19,7 @@ function drawChart() {
 
   // fetch execution data from graphite
 
-  dataTable.addRows([ 
+  dataTable.addRows([
     [ 'Washington', new Date(1789, 3, 29), new Date(1797, 2, 3) ],
     [ 'Adams',      new Date(1797, 2, 3),  new Date(1801, 2, 3) ],
     [ 'Jefferson',  new Date(1801, 2, 3),  new Date(1809, 2, 3) ]]);
@@ -37,13 +37,13 @@ function grabData() {
 function mockData() {
   return [
     {"target": "CartonCleanupFilterAPITimer.counter-TotalDuration.value",
-        "datapoints": [[3*60*60*1000, 1403160060]]}, 
-    {"target":
-        "TimerMonitor_GIDPrintSVCShipmentsInvokeTimer.counter-TotalDuration.value",
-        "datapoints": [[4.5*60*60*1000, 1403160060]]}, 
-    {"target":
-        "TimerMonitor_YFSEventManagerRaiseEventTimer.counter-TotalDuration.value",
-        "datapoints": [[3.9*60*60*1000, 1403160060]]}
+        "datapoints": [[3*60*60*1000, 1403160060]]},
+    // {"target":
+    //     "TimerMonitor_GIDPrintSVCShipmentsInvokeTimer.counter-TotalDuration.value",
+    //     "datapoints": [[4.5*60*60*1000, 1403160060]]},
+    // {"target":
+    //     "TimerMonitor_YFSEventManagerRaiseEventTimer.counter-TotalDuration.value",
+    //     "datapoints": [[3.9*60*60*1000, 1403160060]]}
   ];
 
 }
@@ -57,9 +57,10 @@ function convert(data) {
     var datapoints = metric.datapoints;
     $.each(datapoints, function(index, element){
       console.log(element[0] + " " + element[1]);
-      var end_time = moment.unix(element[1]);
+      var m = moment.unix(element[1]);
+      var end_time = m.clone();
       var execution_time = element[0];
-      var start_time = end_time.subtract(1, 'days');
+      var start_time = m.subtract('ms', execution_time);
       console.log("end_time");
       console.log(end_time);
       console.log("start_time");
